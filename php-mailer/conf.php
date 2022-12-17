@@ -10,7 +10,11 @@ $meta = array(
         "body" => "body",
         "email" => "email",
     ),
+    "recaptch" => array(
+        "secret" => null,
+    )
 );
+
 $conf = array(
     "default" =>  array(
         "email_from" => "no-reply@{$domain}",

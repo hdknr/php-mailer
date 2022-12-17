@@ -68,14 +68,52 @@ function get_value($key, $default)
     return isset($_POST[$name]) ? $_POST[$name] : $default;
 }
 
+
+function api_recaptch($secret, $token)
+{
+    $url = 'https://www.google.com/recaptcha/api/siteverify';
+    $data = array(
+        'secret' => $secret,
+        'response' =>  $token,
+    );
+
+    $context = array(
+        'http' => array(
+            'method'  => 'POST',
+            'header'  => implode("\r\n", array('Content-Type: application/x-www-form-urlencoded',)),
+            'content' => http_build_query($data)
+        )
+    );
+    $api_response = file_get_contents($url, false, stream_context_create($context));
+
+    $result = json_decode($api_response);
+    return $result;
+}
+
+function verify_recaptch()
+{
+    global $meta;
+    $secret = $meta["recaptcha"]["secret"];
+    if ($secret == null) {
+        return true;
+    }
+    $token = get_value("recaptch", "");
+    $res = api_recaptch($secret, $token);
+    return $res->success;
+}
+
 session_start();
 
-$ADDRESS_FROM = "form@spin-dd.com";
 
 if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 
     $csrftoken = get_value("csrftoken", "");
     if ($csrftoken != $_SESSION['key']) {
+        http_response_code(403);
+        $post = var_export($_POST);
+        exit();
+    }
+    if (!verify_recaptch()) {
         http_response_code(403);
         $post = var_export($_POST);
         exit();
