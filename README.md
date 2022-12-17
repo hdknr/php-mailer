@@ -10,6 +10,6 @@ Run:
 
 ~~~bash
 mkdir mails
-docker-compose.yml up -d
+env $(cat .secrets/.env|xargs) docker-compose up -d
 ~~~
 

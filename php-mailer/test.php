@@ -16,6 +16,7 @@ if (!isset($_SESSION['key'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
     <title>php-mailter test</title>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
 </head>
 
 <body>
@@ -51,6 +52,11 @@ if (!isset($_SESSION['key'])) {
             <div class="mb-3">
                 <label for="bodyInput" class="form-label">Body</label>
                 <textarea class="form-control" id="bodyInput" name="body" style="height: 100px"></textarea>
+            </div>
+
+
+            <div class="mb-3">
+                <div class="g-recaptcha" data-sitekey="<?= getenv('RECAPTCHA_SITEKEY') ?>"></div>
             </div>
 
             <button type="submit" class="btn btn-primary">Send</button>
