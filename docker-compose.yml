@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - "80:80"
+      - "25:25"
+    volumes:
+      - ./mails:/usr/src/app/mails
+      - ./public:/var/www/html
+      - ./php-mailer:/var/www/html/php-mailer
+
+volumes:
+  storage:
+    driver: local
