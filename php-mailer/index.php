@@ -61,27 +61,35 @@ function do_sendmail($envelope_from, $from, $to, $reply,  $subject, $msg, $attac
 }
 
 
+function get_value($key, $default)
+{
+    global $meta;
+    $name = $meta["fields"][$key];
+    return isset($_POST[$name]) ? $_POST[$name] : $default;
+}
+
 session_start();
 
 $ADDRESS_FROM = "form@spin-dd.com";
 
 if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 
-    if ($_POST['csrftoken'] != $_SESSION['key']) {
+    $csrftoken = get_value("csrftoken", "");
+    if ($csrftoken != $_SESSION['key']) {
         http_response_code(403);
         $post = var_export($_POST);
         exit();
     }
 
-    $id = isset($_POST["form_id"]) ? $_POST["form_id"] : "default";
+    $id = get_value("id", "default");
 
     $envelope_from = $conf[$id]["email_from"];
     $email_to = $conf["$id"]["email_to"];
-    $from = isset($_POST["email"]) ? $_POST["email"] : $envelope_from;
 
-    $body = $_POST['body'];
-    $subject = $_POST['subject'];
-    $reply = "";    # $_POST['reply'];
+    $from = get_value("email", $envelope_from);
+    $body = get_value("body", "");
+    $subject = get_value("subject", "");
+
     $attachment = null; # $_FILES['attachment'];
 
     if (do_sendmail($envelope_from, $from, $email_to, $reply,  $subject, $body, $attachment)) {
