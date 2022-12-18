@@ -1,17 +1,19 @@
 <?php
+
 $domain = "mysite.com";
+$recaptcha_secretkey = getenv('RECAPTCHA_SECRETKEY');
 
 $meta = array(
     "fields" => array(
         "id" => "formId",
-        "recaptcha" => "reCAPTCHA",
+        "recaptcha" => "g-recaptcha-response",
         "csrftoken" => "csrfToken",
         "subject"  => "subject",
         "body" => "body",
         "email" => "email",
     ),
-    "recaptch" => array(
-        "secret" => null,
+    "recaptcha" => array(
+        "secret" => "{$recaptcha_secretkey}",
     )
 );
 
