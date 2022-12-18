@@ -1,6 +1,20 @@
 <?php
 require "./conf.php";
 
+function logger($message)
+{
+    # https://www.php.net/manual/ja/function.error-log.php
+    error_log($message, 0);
+}
+
+function error_exit($code, $message)
+{
+    http_response_code($code);
+    echo  $message;
+    logger($message);
+    exit();
+}
+
 function get_boundary($attachment)
 {
     if (isset($attachment['name']))
@@ -14,7 +28,7 @@ function do_sendmail($envelope_from, $from, $to, $reply,  $subject, $msg, $attac
     mb_language("Japanese");
     mb_internal_encoding("UTF-8");
 
-    $opt = "-f$envelope_from";
+    $opt = "-f{$envelope_from}";
     $headers = "From: {$from}\nReply-To: ${reply}\n";
 
     $boundary = get_boundary($attachment);
@@ -90,7 +104,7 @@ function api_recaptch($secret, $token)
     return $result;
 }
 
-function verify_recaptch()
+function verify_recaptcha()
 {
     global $meta;
 
@@ -101,6 +115,9 @@ function verify_recaptch()
 
     $token = get_value("recaptcha", "");
     $res = api_recaptch($secret, $token);
+    if (!$res->success) {
+        error_log("reCAPTCHA:" . var_export($res, true));
+    }
     return $res->success;
 }
 
@@ -110,12 +127,13 @@ session_start();
 if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 
     $csrftoken = get_value("csrftoken", "");
+
     if ($csrftoken != $_SESSION['key']) {
-        http_response_code(403);
-        exit();
+        error_exit(401, "CSRF Token mismatch");
     }
-    if (!verify_recaptch()) {
-        http_response_code(403);
+
+    if (!verify_recaptcha()) {
+        error_exit(403, "reCAPTCHA failed");
         exit();
     }
 
@@ -134,7 +152,8 @@ if ($_SERVER["REQUEST_METHOD"] == 'POST') {
         unset($_SESSION['key']);
         echo "SEND OK";
     } else {
-        http_response_code(403);
+        error_exit(400, "sendmail failed");
+        exit();
     }
     exit();
 }
