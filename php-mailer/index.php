@@ -1,6 +1,12 @@
 <?php
 require "./conf.php";
 
+function logger($message)
+{
+    # https://www.php.net/manual/ja/function.error-log.php
+    error_log($message, 0);
+}
+
 function get_boundary($attachment)
 {
     if (isset($attachment['name']))
