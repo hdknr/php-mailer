@@ -93,11 +93,13 @@ function api_recaptch($secret, $token)
 function verify_recaptch()
 {
     global $meta;
+
     $secret = $meta["recaptcha"]["secret"];
-    if ($secret == null) {
+    if (empty($secret)) {
         return true;
     }
-    $token = get_value("recaptch", "");
+
+    $token = get_value("recaptcha", "");
     $res = api_recaptch($secret, $token);
     return $res->success;
 }
@@ -110,12 +112,10 @@ if ($_SERVER["REQUEST_METHOD"] == 'POST') {
     $csrftoken = get_value("csrftoken", "");
     if ($csrftoken != $_SESSION['key']) {
         http_response_code(403);
-        $post = var_export($_POST);
         exit();
     }
     if (!verify_recaptch()) {
         http_response_code(403);
-        $post = var_export($_POST);
         exit();
     }
 
