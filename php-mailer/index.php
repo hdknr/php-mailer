@@ -14,7 +14,7 @@ function do_sendmail($envelope_from, $from, $to, $reply,  $subject, $msg, $attac
     mb_language("Japanese");
     mb_internal_encoding("UTF-8");
 
-    $opt = "-f$envelope_from";
+    $opt = "-f{$envelope_from}";
     $headers = "From: {$from}\nReply-To: ${reply}\n";
 
     $boundary = get_boundary($attachment);
