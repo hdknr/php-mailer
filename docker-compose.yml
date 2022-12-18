@@ -12,6 +12,9 @@ services:
       - ./mails:/usr/src/app/mails
       - ./public:/var/www/html
       - ./php-mailer:/var/www/html/php-mailer
+    environment:
+      RECAPTCHA_SITEKEY: ${RECAPTCHA_SITEKEY}
+      RECAPTCHA_SECRETKEY: ${RECAPTCHA_SECRETKEY}
 
 volumes:
   storage:

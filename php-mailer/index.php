@@ -61,27 +61,73 @@ function do_sendmail($envelope_from, $from, $to, $reply,  $subject, $msg, $attac
 }
 
 
+function get_value($key, $default)
+{
+    global $meta;
+    $name = $meta["fields"][$key];
+    return isset($_POST[$name]) ? $_POST[$name] : $default;
+}
+
+
+function api_recaptch($secret, $token)
+{
+    $url = 'https://www.google.com/recaptcha/api/siteverify';
+    $data = array(
+        'secret' => $secret,
+        'response' =>  $token,
+    );
+
+    $context = array(
+        'http' => array(
+            'method'  => 'POST',
+            'header'  => implode("\r\n", array('Content-Type: application/x-www-form-urlencoded',)),
+            'content' => http_build_query($data)
+        )
+    );
+    $api_response = file_get_contents($url, false, stream_context_create($context));
+
+    $result = json_decode($api_response);
+    return $result;
+}
+
+function verify_recaptch()
+{
+    global $meta;
+
+    $secret = $meta["recaptcha"]["secret"];
+    if (empty($secret)) {
+        return true;
+    }
+
+    $token = get_value("recaptcha", "");
+    $res = api_recaptch($secret, $token);
+    return $res->success;
+}
+
 session_start();
 
-$ADDRESS_FROM = "form@spin-dd.com";
 
 if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 
-    if ($_POST['csrftoken'] != $_SESSION['key']) {
+    $csrftoken = get_value("csrftoken", "");
+    if ($csrftoken != $_SESSION['key']) {
         http_response_code(403);
-        $post = var_export($_POST);
+        exit();
+    }
+    if (!verify_recaptch()) {
+        http_response_code(403);
         exit();
     }
 
-    $id = isset($_POST["form_id"]) ? $_POST["form_id"] : "default";
+    $id = get_value("id", "default");
 
     $envelope_from = $conf[$id]["email_from"];
     $email_to = $conf["$id"]["email_to"];
-    $from = isset($_POST["email"]) ? $_POST["email"] : $envelope_from;
 
-    $body = $_POST['body'];
-    $subject = $_POST['subject'];
-    $reply = "";    # $_POST['reply'];
+    $from = get_value("email", $envelope_from);
+    $body = get_value("body", "");
+    $subject = get_value("subject", "");
+
     $attachment = null; # $_FILES['attachment'];
 
     if (do_sendmail($envelope_from, $from, $email_to, $reply,  $subject, $body, $attachment)) {
