@@ -7,6 +7,14 @@ function logger($message)
     error_log($message, 0);
 }
 
+function error_exit($code, $message)
+{
+    http_response_code($code);
+    echo  $message;
+    logger($message);
+    exit();
+}
+
 function get_boundary($attachment)
 {
     if (isset($attachment['name']))
