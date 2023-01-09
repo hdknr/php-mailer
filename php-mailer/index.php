@@ -22,14 +22,14 @@ function get_boundary($attachment)
     return null;
 }
 
-function do_sendmail($envelope_from, $from, $to, $reply,  $subject, $msg, $attachment)
+function do_sendmail($envelope_from, $from, $to, $cc, $reply,  $subject, $msg, $attachment)
 {
 
     mb_language("Japanese");
     mb_internal_encoding("UTF-8");
 
     $opt = "-f{$envelope_from}";
-    $headers = "From: {$from}\nReply-To: ${reply}\n";
+    $headers = "From: {$from}\nReply-To: ${reply}\nCc: ${cc}\n";
 
     $boundary = get_boundary($attachment);
 
@@ -141,6 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 
     $envelope_from = $conf[$id]["email_from"];
     $email_to = $conf["$id"]["email_to"];
+    $email_cc = $conf["$id"]["email_cc"];
 
     $from = get_value("email", $envelope_from);
     $body = get_value("body", "");
@@ -148,7 +149,7 @@ if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 
     $attachment = null; # $_FILES['attachment'];
 
-    if (do_sendmail($envelope_from, $from, $email_to, $reply,  $subject, $body, $attachment)) {
+    if (do_sendmail($envelope_from, $from, $email_to, $email_cc, $reply,  $subject, $body, $attachment)) {
         unset($_SESSION['key']);
         echo "SEND OK";
     } else {

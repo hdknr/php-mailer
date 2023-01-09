@@ -23,9 +23,11 @@ $conf = array(
     "default" =>  array(
         "email_from" => "no-reply@{$domain}",
         "email_to" => "contact@{$domain}",
+        "email_cc" => "contact-1-cc@{$domain}",
     ),
-    "form-id-1" =>  array(
+    "school-contact-default" =>  array(
         "email_from" => "no-reply-1@{$domain}",
         "email_to" => "contact-1@{$domain}",
+        "email_cc" => "contact-1-cc@{$domain}",
     ),
 );
