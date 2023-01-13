@@ -24,33 +24,33 @@ function get_boundary($attachment)
 
 function do_sendmail($envelope_from, $from, $to, $cc, $reply,  $subject, $msg, $attachment)
 {
+    global $meta;
+
+    $encoding = $meta["mail"]["encoding"];
+    $bits = $meta["mail"]["bits"];
 
     mb_language("Japanese");
     mb_internal_encoding("UTF-8");
 
     $opt = "-f{$envelope_from}";
-    $headers = "From: {$from}\nReply-To: ${reply}\nCc: ${cc}\n";
+    $headers = "From: {$from}\nReply-To: {$reply}\nCc: {$cc}\n";
+    $headers .= "MIME-Version: 1.0\n";
+    $headers .= "Content-Transfer-Encoding: {$bits}\n";
+
+    $message = mb_convert_encoding($msg, $encoding);
 
     $boundary = get_boundary($attachment);
 
     if ($boundary) {
-        $mime_type = "application/octet-stream";
-
-        $headers .= "MIME-Version: 1.0\n";
-        $headers .= "Content-Type: multipart/mixed; boundary=\"${boundary}\"\n";
-        $headers .= "Content-Transfer-Encoding: 7bit\n";
-
+        $headers .= "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\n";
 
         $filename = $attachment['name'];
-        $filename = mb_convert_encoding($filename, 'ISO-2022-JP');
-        $filename = "=?ISO-2022-JP?B?" . base64_encode($filename) . "?=";
-
+        $filename = mb_encode_mimeheader($filename, $encoding);
         $filebody = file_get_contents($attachment['tmp_name']);
         $fileencoded = chunk_split(base64_encode($filebody));
 
-        $message = mb_convert_encoding($msg, 'ISO-2022-JP');
-
         $body = '';
+        $mime_type = "application/octet-stream";
 
         # file
         $body .= '--' . $boundary . "\n";
@@ -61,14 +61,17 @@ function do_sendmail($envelope_from, $from, $to, $cc, $reply,  $subject, $msg, $
 
         # message
         $body .= '--' . $boundary . "\n";
-        $body .= "Content-Type: text/plain; charset=ISO-2022-JP;\n" .
-            "Content-Transfer-Encoding: 7bit\n";
+        $body .= "Content-Type: text/plain; charset={$encoding};\n" .
+            "Content-Transfer-Encoding: {$bits}\n";
         $body .= "\n";
         $body .= "{$message}\n";
         $body .= "\n";
 
 
         $msg = $body;
+    } else {
+        $headers .= "Content-Type: text/plain; charset={$encoding}\n";
+        $msg = $message;
     }
 
     return mb_send_mail($to, $subject, $msg, $headers, $opt);
