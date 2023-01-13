@@ -15,7 +15,11 @@ $meta = array(
     ),
     "recaptcha" => array(
         "secret" => "{$recaptcha_secretkey}",
-    )
+    ),
+    "mail" => array(
+        "encoding" => "UTF-8",   # ISO-2022-JP
+        "bits" => "8bit",   # 7bit
+    ),
 );
 
 # configuration for each form ID

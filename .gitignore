@@ -2,3 +2,5 @@
 .secrets
 mails
 public
+php-mailer/conf_devel.php
+php-mailer/info.php
